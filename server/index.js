@@ -22,10 +22,12 @@ app.get("/balance/:address", (req, res) => {
   res.send({ balance });
 });
 
-app.get("/signature/:privateKey", (req, res) => {
-  const { privateKey } = req.params;
-  const msgHash = (keccak256(utf8ToBytes()))
-  res.send({ privateKey, recoveryBit });
+app.get("/signature", (req, res) => {
+  const { privateKey, address } = req.query;
+  console.log(req.query);
+
+  // const msgHash = (keccak256(utf8ToBytes(`Requesting signature for `)))
+  // res.send({ privateKey, recoveryBit });
 });
 
 app.post("/send", (req, res) => {

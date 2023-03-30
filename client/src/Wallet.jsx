@@ -2,9 +2,9 @@ import { useState } from "react";
 import server from "./server";
 
 function Wallet({ address, setAddress, balance, setBalance }) {
-  const [signature, setSignature] = useState('');
-  const [recoveryBit, setRecoveryBit] = useState('');
-  const [privateKey, setPrivateKey] = useState('');
+  const [signature, setSignature] = useState("");
+  const [recoveryBit, setRecoveryBit] = useState("");
+  const [privateKey, setPrivateKey] = useState("");
 
   async function onChange(evt) {
     const address = evt.target.value;
@@ -19,18 +19,26 @@ function Wallet({ address, setAddress, balance, setBalance }) {
     }
   }
 
-  async function getSignature(evt) {
+  async function onPrivateKey(evt) {
     const privateKey = evt.target.value;
     setPrivateKey(privateKey);
-    if (privateKey) {
+  }
+
+  async function getSignature() {
+    if (privateKey && address) {
       const {
         data: { signature, recoveryBit },
-      } = await server.get(`signature/${privateKey}`);
+      } = await server.get(`signature`, {
+        params: {
+          privateKey,
+          address,
+        },
+      });
       setSignature(signature);
       setRecoveryBit(recoveryBit);
     } else {
-      setSignature('');
-      setRecoveryBit('');
+      setSignature("");
+      setRecoveryBit("");
     }
   }
 
@@ -44,19 +52,21 @@ function Wallet({ address, setAddress, balance, setBalance }) {
           placeholder="Type an address, for example: 0x1"
           value={address}
           onChange={onChange}
+          required
         ></input>
       </label>
 
       <div className="balance">Balance: {balance}</div>
 
-      <br/>
+      <br />
 
       <label>
         Get Signature
         <input
           placeholder="Enter your pivate key"
           value={privateKey}
-          onChange={getSignature}
+          onChange={onPrivateKey}
+          required
         ></input>
       </label>
 
