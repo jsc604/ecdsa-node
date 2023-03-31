@@ -35,13 +35,13 @@ app.post("/send", async (req, res) => {
 
   const message = txMessage(sender, amount, recipient);
   const [signature, recoveryBit] = await getSignature(message, privateKey);
-  const recovered = getPublicKey(message, signature, recoveryBit);
-  const publicKey = keccak256(recovered.slice(-20));
+  const publicKey = getPublicKey(message, signature, recoveryBit);
+  const recoveredAddress = keccak256(publicKey.slice(-20));
 
-  if (`0x${toHex(publicKey)}` === sender){
+  if (`0x${toHex(recoveredAddress)}` === sender) {
     setInitialBalance(sender);
     setInitialBalance(recipient);
-  
+
     if (balances[sender] < amount) {
       res.status(400).send({ message: "Not enough funds!" });
       return
