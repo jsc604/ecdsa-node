@@ -26,7 +26,7 @@ function Wallet({ address, setAddress, balance, setBalance, privateKey, setPriva
       <label>
         Wallet Address
         <input
-          placeholder="Type an address, for example: 0x1"
+          placeholder="Enter the sender address"
           value={address}
           onChange={onChange}
         ></input>
@@ -39,7 +39,7 @@ function Wallet({ address, setAddress, balance, setBalance, privateKey, setPriva
       <label>
           Private Key
           <input
-            placeholder="Enter your pivate key"
+            placeholder="Enter the pivate key"
             value={privateKey}
             onChange={onPrivateKey}
             type="password"

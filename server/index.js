@@ -4,6 +4,7 @@ const { keccak256 } = require("ethereum-cryptography/keccak");
 const getSignature = require("./scripts/getSignature");
 const getPublicKey = require("./scripts/getPublicKey");
 const txMessage = require("./scripts/getTxMessage");
+const generateKeys = require("./scripts/generate");
 
 const express = require("express");
 const app = express();
@@ -23,6 +24,12 @@ app.get("/balance/:address", (req, res) => {
   const { address } = req.params;
   const balance = balances[address] || 0;
   res.send({ balance });
+});
+
+app.get("/generate", (req, res) => {
+  const keys = generateKeys();
+  balances[keys.address] = 100;
+  res.send(keys);
 });
 
 app.post("/send", async (req, res) => {
