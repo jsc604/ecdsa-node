@@ -1,6 +1,7 @@
 const secp = require("ethereum-cryptography/secp256k1");
-const { toHex, utf8ToBytes  } = require("ethereum-cryptography/utils");
+const { toHex, utf8ToBytes, hexToBytes } = require("ethereum-cryptography/utils")
 const { keccak256 } = require("ethereum-cryptography/keccak");
+const getSignature = require("./scripts/getSignature");
 
 const express = require("express");
 const app = express();
@@ -22,13 +23,24 @@ app.get("/balance/:address", (req, res) => {
   res.send({ balance });
 });
 
-app.get("/signature", (req, res) => {
+app.get("/signature", async (req, res) => {
   const { privateKey, address } = req.query;
-  console.log(req.query);
+  // console.log(req.query);
 
-  // const msgHash = (keccak256(utf8ToBytes(`Requesting signature for `)))
-  // res.send({ privateKey, recoveryBit });
+  const msg = `Requesting signature for ${address}`;
+  const signature = await getSignature(msg, privateKey);
+
+  // console.log('signature: ', signature);
+
+  // // console.log('------', toHex(signature[0]));
+  // // console.log('======', signature[1]);
+
+  res.send({
+    signature: toHex(signature[0]),
+    recoveryBit: signature[1],
+  });
 });
+
 
 app.post("/send", (req, res) => {
   const { sender, recipient, amount, signature, recoveryBit } = req.body;

@@ -24,7 +24,9 @@ function Wallet({ address, setAddress, balance, setBalance }) {
     setPrivateKey(privateKey);
   }
 
-  async function getSignature() {
+  async function getSignature(evt) {
+    evt.preventDefault();
+    
     if (privateKey && address) {
       const {
         data: { signature, recoveryBit },
@@ -35,6 +37,8 @@ function Wallet({ address, setAddress, balance, setBalance }) {
         },
       });
       setSignature(signature);
+      console.log('signature: ', signature);
+      console.log('recovery: ', recoveryBit);
       setRecoveryBit(recoveryBit);
     } else {
       setSignature("");
@@ -49,7 +53,7 @@ function Wallet({ address, setAddress, balance, setBalance }) {
       <label>
         Wallet Address
         <input
-          placeholder="Type an address, for example: 0x1"
+          placeholder="Enter your address, for example: 0x1"
           value={address}
           onChange={onChange}
           required
@@ -61,16 +65,18 @@ function Wallet({ address, setAddress, balance, setBalance }) {
       <br />
 
       <label>
-        Get Signature
+        <h2>Get Signature</h2>
+        Private Key
         <input
           placeholder="Enter your pivate key"
           value={privateKey}
           onChange={onPrivateKey}
+          type='password'
           required
         ></input>
       </label>
 
-      <div className="balance">Signature: {signature}</div>
+      <div className="balance"><p style={{wordBreak: 'break-all'}}>Signature: <br/>{signature}</p></div>
       <div className="balance">Recovery Bit: {recoveryBit}</div>
 
       <input type="submit" className="button" value="Sign" />
