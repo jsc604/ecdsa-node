@@ -20,6 +20,7 @@ function Transfer({ address, setBalance, privateKey }) {
           privateKey,
         });
         setBalance(balance);
+        alert("Your transfer was successsful!");
       } catch (ex) {
         alert(ex.response.data.message);
       }
