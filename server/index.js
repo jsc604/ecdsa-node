@@ -2,6 +2,7 @@ const secp = require("ethereum-cryptography/secp256k1");
 const { toHex, utf8ToBytes, hexToBytes } = require("ethereum-cryptography/utils")
 const { keccak256 } = require("ethereum-cryptography/keccak");
 const getSignature = require("./scripts/getSignature");
+const getPublicKey = require("./scripts/getPublicKey");
 
 const express = require("express");
 const app = express();
@@ -25,15 +26,9 @@ app.get("/balance/:address", (req, res) => {
 
 app.get("/signature", async (req, res) => {
   const { privateKey, address } = req.query;
-  // console.log(req.query);
 
-  const msg = `Requesting signature for ${address}`;
-  const signature = await getSignature(msg, privateKey);
-
-  // console.log('signature: ', signature);
-
-  // // console.log('------', toHex(signature[0]));
-  // // console.log('======', signature[1]);
+  const message = `Requesting signature for ${address}`;
+  const signature = await getSignature(message, privateKey);
 
   res.send({
     signature: toHex(signature[0]),
@@ -41,20 +36,22 @@ app.get("/signature", async (req, res) => {
   });
 });
 
-
-app.post("/send", (req, res) => {
+app.post("/send", async (req, res) => {
   const { sender, recipient, amount, signature, recoveryBit } = req.body;
 
-  setInitialBalance(sender);
-  setInitialBalance(recipient);
+  const publicKey = getPublicKey(signature, recoveryBit, sender, amount, recipient);
+  console.log('publicKey: ', toHex(publicKey));
+  
+  // setInitialBalance(sender);
+  // setInitialBalance(recipient);
 
-  if (balances[sender] < amount) {
-    res.status(400).send({ message: "Not enough funds!" });
-  } else {
-    balances[sender] -= amount;
-    balances[recipient] += amount;
-    res.send({ balance: balances[sender] });
-  }
+  // if (balances[sender] < amount) {
+  //   res.status(400).send({ message: "Not enough funds!" });
+  // } else {
+  //   balances[sender] -= amount;
+  //   balances[recipient] += amount;
+  //   res.send({ balance: balances[sender] });
+  // }
 });
 
 app.listen(port, () => {
