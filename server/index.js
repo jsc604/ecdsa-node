@@ -1,8 +1,9 @@
 const secp = require("ethereum-cryptography/secp256k1");
-const { toHex, utf8ToBytes, hexToBytes } = require("ethereum-cryptography/utils")
+const { toHex } = require("ethereum-cryptography/utils")
 const { keccak256 } = require("ethereum-cryptography/keccak");
 const getSignature = require("./scripts/getSignature");
 const getPublicKey = require("./scripts/getPublicKey");
+const txMessage = require("./scripts/getTxMessage");
 
 const express = require("express");
 const app = express();
@@ -24,34 +25,35 @@ app.get("/balance/:address", (req, res) => {
   res.send({ balance });
 });
 
-app.get("/signature", async (req, res) => {
-  const { privateKey, address } = req.query;
-
-  const message = `Requesting signature for ${address}`;
-  const signature = await getSignature(message, privateKey);
-
-  res.send({
-    signature: toHex(signature[0]),
-    recoveryBit: signature[1],
-  });
-});
-
 app.post("/send", async (req, res) => {
-  const { sender, recipient, amount, signature, recoveryBit } = req.body;
+  const { privateKey, sender, amount, recipient } = req.body;
 
-  const publicKey = getPublicKey(signature, recoveryBit, sender, amount, recipient);
-  console.log('publicKey: ', toHex(publicKey));
+  if (!secp.utils.isValidPrivateKey(privateKey)) {
+    res.status(400).send({ message: "Invalid private key!" });
+    return;
+  }
+
+  const message = txMessage(sender, amount, recipient);
+  const [signature, recoveryBit] = await getSignature(message, privateKey);
+  const recovered = getPublicKey(message, signature, recoveryBit);
+  const publicKey = keccak256(recovered.slice(-20));
+
+  if (`0x${toHex(publicKey)}` === sender){
+    setInitialBalance(sender);
+    setInitialBalance(recipient);
   
-  // setInitialBalance(sender);
-  // setInitialBalance(recipient);
-
-  // if (balances[sender] < amount) {
-  //   res.status(400).send({ message: "Not enough funds!" });
-  // } else {
-  //   balances[sender] -= amount;
-  //   balances[recipient] += amount;
-  //   res.send({ balance: balances[sender] });
-  // }
+    if (balances[sender] < amount) {
+      res.status(400).send({ message: "Not enough funds!" });
+      return
+    } else {
+      balances[sender] -= amount;
+      balances[recipient] += amount;
+      res.send({ balance: balances[sender] });
+    }
+  } else {
+    res.status(400).send({ message: "Signature not verified. Please enter a valid private key." });
+    return;
+  }
 });
 
 app.listen(port, () => {
