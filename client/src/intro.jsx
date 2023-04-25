@@ -1,7 +1,7 @@
 function Intro() {
   return (
     <div className="intro">
-      <h1>eCDSA Node project demo</h1>
+      <h1>ECDSA Node project demo</h1>
       <p>
         The ECDSA Node Project Demo is a comprehensive example showcasing the
         implementation of Elliptic Curve Digital Signature Algorithm (ECDSA)
